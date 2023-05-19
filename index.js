@@ -1,6 +1,6 @@
 const express = require('express')
 const app = express()
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cors = require('cors')
 const port = process.env.PORT || 5000
 require('dotenv').config()
@@ -39,7 +39,37 @@ async function run() {
         app.get('/allToys', async (req, res) => {
             // making a cursor to run a find 
             const cursor = toyCollection.find()
-            const result
+            const result = await cursor.toArray()
+            res.send(result)
+        })
+        // getting a single toy info
+        app.get('/allToys/:id', async (req, res) => {
+            const id = req.params.id
+            // finding the matched id in the db and send it via response
+            const query = { _id: new ObjectId(id) }
+            const options = {
+
+                projection: { photo: 1, name: 1, sellerName: 1, sellerEmail: 1, price: 1, rating: 1, quantity: 1, details: 1 },
+            };
+            const result = await toyCollection.findOne(query, options)
+            res.send(result)
+        })
+        // sending date specific to a user
+        app.get('/myToys', async (req, res) => {
+            const email = req.query.email
+            console.log(email);
+            const query = { email: email }
+            console.log(query);
+            const cursor = toyCollection.find(query)
+            const result = await cursor.toArray()
+            res.send(result)
+        })
+        // deleting a item based on id
+        app.get('/myToys', async (req, res) => {
+            const id = req.body.id
+            const query = { _id: new ObjectId(id) }
+            const result = await toyCollection.deleteOne(query)
+            res.send(result)
         })
         // adding new toys to db
         app.post('/addToy', async (req, res) => {
