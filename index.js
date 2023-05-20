@@ -39,7 +39,7 @@ async function run() {
         // getting all toys from db 
         app.get('/allToys', async (req, res) => {
             // making a cursor to run a find 
-            const cursor = toyCollection.find()
+            const cursor = toyCollection.find().limit(20)
             const result = await cursor.toArray()
             res.send(result)
         })
