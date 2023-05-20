@@ -30,6 +30,7 @@ const client = new MongoClient(uri, {
     }
 });
 
+
 async function run() {
     try {
         // Connect the client to the server	(optional starting in v4.7)
@@ -64,13 +65,6 @@ async function run() {
             const result = await cursor.toArray()
             res.send(result)
         })
-        // // deleting a item based on id
-        // app.delete('/myToys', async (req, res) => {
-        //     const id = req.body.id
-        //     const query = { _id: new ObjectId(id) }
-        //     const result = await toyCollection.deleteOne(query)
-        //     res.send(result)
-        // })
         // adding new toys to db
         app.post('/addToy', async (req, res) => {
             const toy = req.body
@@ -104,6 +98,17 @@ async function run() {
             console.log(updatedToy);
             const result = await toyCollection.updateOne(filter, toy, options)
             res.send(result)
+        })
+        // sub category filter section
+        app.get('/category', async (req, res) => {
+            const subCategory = req.query.subCategory
+            console.log(subCategory);
+            // console.log(req.query);
+            const query = { subCategory: subCategory }
+            const cursor = toyCollection.find(query)
+            const result = await cursor.toArray()
+            res.send(result)
+            console.log(result);
         })
         // deleting a specific toy data with id 
         app.delete('/myToys', async (req, res) => {
