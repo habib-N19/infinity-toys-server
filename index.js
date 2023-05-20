@@ -54,7 +54,7 @@ async function run() {
             const result = await toyCollection.findOne(query, options)
             res.send(result)
         })
-        // sending date specific to a user
+        // sending data specific to a user
         app.get('/myToys', async (req, res) => {
             const email = req.query.email
             console.log(email);
@@ -64,18 +64,45 @@ async function run() {
             const result = await cursor.toArray()
             res.send(result)
         })
-        // deleting a item based on id
-        app.get('/myToys', async (req, res) => {
-            const id = req.body.id
-            const query = { _id: new ObjectId(id) }
-            const result = await toyCollection.deleteOne(query)
-            res.send(result)
-        })
+        // // deleting a item based on id
+        // app.delete('/myToys', async (req, res) => {
+        //     const id = req.body.id
+        //     const query = { _id: new ObjectId(id) }
+        //     const result = await toyCollection.deleteOne(query)
+        //     res.send(result)
+        // })
         // adding new toys to db
         app.post('/addToy', async (req, res) => {
             const toy = req.body
             console.log(toy);
             const result = await toyCollection.insertOne(toy)
+            res.send(result)
+        })
+        // to update a specific toy data first we have to fetch the existing data based on the id
+        // step : 1
+        app.get('/myToys/:id', async (req, res) => {
+            const id = req.params.id
+            const query = { _id: new ObjectId(id) }
+            const result = await toyCollection.findOne(query)
+            res.send(result)
+
+        })
+        // step: 2- adding the updated data  to the db
+        app.put('/myToys/:id', async (req, res) => {
+            const id = req.params.id
+            const filter = { _id: new ObjectId(id) }
+            const options = { upsert: true }
+            const updatedToy = req.body
+            const toy = {
+                $set: {
+                    price: updatedToy.price,
+                    quantity: updatedToy.quantity,
+                    details: updatedToy.details
+
+                }
+            }
+            console.log(updatedToy);
+            const result = await toyCollection.updateOne(filter, toy, options)
             res.send(result)
         })
         // deleting a specific toy data with id 
@@ -85,11 +112,6 @@ async function run() {
             const result = await toyCollection.deleteOne(query)
             res.send(result)
         })
-
-
-
-
-
 
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
