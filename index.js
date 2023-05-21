@@ -36,6 +36,11 @@ async function run() {
         // Connect the client to the server	(optional starting in v4.7)
         client.connect();
         const toyCollection = client.db('infinityToys').collection('toys')
+        // creating index for search
+        // const indexKeys = { name: 1 }; // Replace field1 and field2 with your actual field names
+        // const indexOptions = { name: "name" }; // Replace index_name with the desired index name
+        // const result = await toyCollection.createIndex(indexKeys, indexOptions);
+        // console.log(result);
         // getting all toys from db 
         app.get('/allToys', async (req, res) => {
             // making a cursor to run a find 
@@ -58,9 +63,9 @@ async function run() {
         // sending data specific to a user
         app.get('/myToys', async (req, res) => {
             const email = req.query.email
-            console.log(email);
+            // console.log(email);
             const query = { email: email }
-            console.log(query);
+            // console.log(query);
             const cursor = toyCollection.find(query)
             const result = await cursor.toArray()
             res.send(result)
@@ -68,7 +73,7 @@ async function run() {
         // adding new toys to db
         app.post('/addToy', async (req, res) => {
             const toy = req.body
-            console.log(toy);
+            // console.log(toy);
             const result = await toyCollection.insertOne(toy)
             res.send(result)
         })
@@ -95,24 +100,41 @@ async function run() {
 
                 }
             }
-            console.log(updatedToy);
+            // console.log(updatedToy);
             const result = await toyCollection.updateOne(filter, toy, options)
             res.send(result)
         })
         // sub category filter section
         app.get('/category', async (req, res) => {
             const subCategory = req.query.subCategory
-            console.log(subCategory);
+            // console.log(subCategory);
             // console.log(req.query);
             const query = { subCategory: subCategory }
             const cursor = toyCollection.find(query)
             const result = await cursor.toArray()
             res.send(result)
-            console.log(result);
+            // console.log(result);
         })
+        // running a search request
+        app.get('/searchToy/:text', async (req, res) => {
+            const text = req.params.text
+            const result = await toyCollection.find({
+                $or: [
+                    { name: { $regex: text, $options: "i" } },
+
+                ],
+            })
+                .toArray();
+            res.send(result);
+        })
+        // sorting by price in ascending order
+        // app.get('/price-ascending', async (req, res) => {
+        //     const
+        // })
         // deleting a specific toy data with id 
-        app.delete('/myToys', async (req, res) => {
+        app.delete('/myToys/:id', async (req, res) => {
             const id = req.params.id
+            console.log(id);
             const query = { _id: new ObjectId(id) }
             const result = await toyCollection.deleteOne(query)
             res.send(result)
