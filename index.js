@@ -62,14 +62,28 @@ async function run() {
         })
         // sending data specific to a user
         app.get('/myToys', async (req, res) => {
-            const email = req.query.email
-            // console.log(email);
-            const query = { email: email }
-            // console.log(query);
-            const cursor = toyCollection.find(query)
-            const result = await cursor.toArray()
-            res.send(result)
-        })
+            const email = req.query.email;
+            const sort = req.query.sort;
+
+            const query = { email: email };
+
+            if (sort === 'asc') {
+                const cursor = toyCollection.find(query)
+                    .sort({ price: 1 }).collation({ locale: 'en_US', numericOrdering: true })
+                const result = await cursor.toArray();
+                res.send(result);
+            } else if (sort === 'des') {
+                const cursor = toyCollection.find(query)
+                    .sort({ price: -1 }).collation({ locale: 'en_US', numericOrdering: true })
+                const result = await cursor.toArray();
+                res.send(result);
+            } else if (sort === '') {
+                const cursor = toyCollection.find(query);
+                const result = await cursor.toArray();
+                res.send(result);
+            }
+        });
+
         // adding new toys to db
         app.post('/addToy', async (req, res) => {
             const toy = req.body
